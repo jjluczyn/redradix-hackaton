@@ -66,8 +66,8 @@ async function main(tank) {
 	async function _shoot_backwards(){
 		let baseAngle = movements[curMov] + 135;
 		// Randomize angle to avoid infinite loops with other tanks
-		baseAngle += (Math.random() - 0.5) * 20;
-		await _shoot(baseAngle, 700);
+		baseAngle += (Math.random() - 0.5) * 30;
+		await tank.shoot(a(baseAngle), 700);
 	}
 
 	async function _scan(angle){
@@ -126,7 +126,7 @@ async function main(tank) {
 		} else {
 			aperture+=4;
             iterWithoutFind++;
-            if(iterWithoutFind > 3){
+            if(iterWithoutFind > 3 && iterWithoutFind % 2 === 0){
                 await _shoot_backwards();
             }
         }
