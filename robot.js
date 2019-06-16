@@ -143,15 +143,32 @@ async function main(tank) {
 	async function nextMove(){
 		let posX = await tank.getX();
 		let posY = await tank.getY();
-		while (posX < limit[curMov][0] || posX > limit[curMov][1] || posY < limit[curMov][2] || posY > limit[curMov][3]){
-			curMov = (curMov +1)%maxMov;
-		}
-		if (posX < limitSpeed[curMov][0] || posX > limitSpeed[curMov][1] || posY < limitSpeed[curMov][2] || posY > limitSpeed[curMov][3]){
-			curSpeed = 100;
-		} else {
-			curSpeed = 45;
-		}
-		console.log("Moving to "+curMov+" with "+posX+" "+posY);
+		if(posX > 350 && posX < 1000 && posY > 350 && posY < 650) {
+		    // Estamos en el centro, vamos a la pared mas cercana, CORRE PLATANO
+            let izq = posX < max_width / 2;
+            let arriba = posY > max_height / 2;
+
+            if(izq && arriba){
+                curMov = 2;
+            } else if (izq && !arriba) {
+                curMov = 3;
+            } else if (!izq && !arriba) {
+                curMov = 0;
+            } else if (!izq && arriba) {
+                curMov = 1;
+            }
+        } else {
+            while (posX < limit[curMov][0] || posX > limit[curMov][1] || posY < limit[curMov][2] || posY > limit[curMov][3]){
+                curMov = (curMov +1)%maxMov;
+            }
+            if (posX < limitSpeed[curMov][0] || posX > limitSpeed[curMov][1] || posY < limitSpeed[curMov][2] || posY > limitSpeed[curMov][3]){
+                curSpeed = 100;
+            } else {
+                curSpeed = 45;
+            }
+            //console.log("Moving to "+curMov+" with "+posX+" "+posY);
+        }
+
 	}
 
 	async function correctTrajectory(){
