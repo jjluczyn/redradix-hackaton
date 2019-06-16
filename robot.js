@@ -11,7 +11,6 @@ async function main(tank) {
 	const minAperture = 2;
 	const maxAperture = 20;
 
-
 	// movement vars
 	const movements = [0,90,180,270];
 	// x < , x > , y < , y > nextCondition
@@ -32,13 +31,10 @@ async function main(tank) {
 	let curMov = 0;
 	let curSpeed = 100;
 	let currentAngle = 0;
-	// end movement vars
 
-	const tankStateData = {
-		last: {},
-		current: {},
-		aperture: 360
-	};
+	// Initial random scan margin
+    let aperture = 2;
+    let iterWithoutFind = 0;
 
 	// Prevent angle overflow
 	function a(angle){
@@ -55,7 +51,6 @@ async function main(tank) {
 	}
 
 	async function _shoot(angle, distance){
-		//console.log(distance);
 		let apertureRange = maxAperture - minAperture;
 		let distanceRatio = distance / max_distance;
 		let rate = apertureRange * distanceRatio;
@@ -67,6 +62,10 @@ async function main(tank) {
 		await tank.shoot(a(angle + 2.5), d(distance));
 		await tank.shoot(a(angle + 7.5), d(distance));
 	}
+
+	async function _shoot_backwards(distance){
+
+    }
 
 	async function _scan(angle){
 		return tank.scan(a(angle + 5), 10);
@@ -87,23 +86,33 @@ async function main(tank) {
 		//console.log("Variation: " + variation + " Angle: "+ currentAngle);
 	}
 
-	let x = await tank.getX();
-	if(x<700)
-		curMov = 2;
-	else curMov = 0;
+	async function _init_strategy(){
+        let x = await tank.getX();
+        curMov = x < 700 ? 2 : 0;
+    }
 
+    // *********************
+    // Execution starts here
+    // *********************
+    await _init_strategy();
 	while (true) {
 
 		let enemyDistance = await _scan_strategy2();
+
 		// Hemos encontrado a alguien
 		if(enemyDistance){
 			if(enemyDistance >= min_distance && enemyDistance <= max_distance){
 				await _shoot(currentAngle, enemyDistance);
 			}
-			tankStateData.aperture = 2;
+			aperture = 2;
+            iterWithoutFind = 0;
 		} else {
-			tankStateData.aperture+=4;
-		}
+			aperture+=4;
+            iterWithoutFind++;
+            if(iterWithoutFind > 3){
+                await _shoot_backwards();
+            }
+        }
 
 		await nextMove();
 		await correctTrajectory();
