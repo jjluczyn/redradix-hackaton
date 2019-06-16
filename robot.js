@@ -63,9 +63,12 @@ async function main(tank) {
 		await tank.shoot(a(angle + 7.5), d(distance));
 	}
 
-	async function _shoot_backwards(distance){
-
-    }
+	async function _shoot_backwards(){
+		let baseAngle = movements[curMov] + 135;
+		// Randomize angle to avoid infinite loops with other tanks
+		baseAngle += (Math.random() - 0.5) * 20;
+		await _shoot(baseAngle, 700);
+	}
 
 	async function _scan(angle){
 		return tank.scan(a(angle + 5), 10);
