@@ -15,10 +15,10 @@ async function main(tank) {
 	const movements = [0,90,180,270];
 	// x < , x > , y < , y > nextCondition
 	const limit = [
-		[0,1190,0,2000],
-		[0,2000,0,850],
-		[150,2000,0,2000],
-		[0,2000,150,2000]
+		[0,1140,0,2000],
+		[0,2000,0,820],
+		[190,2000,0,2000],
+		[0,2000,190,2000]
 	];
 	const limitSpeed = [
 		[1000,2000,0,2000],
@@ -124,11 +124,7 @@ async function main(tank) {
 	}
 
 	async function setMove() {
-		if (changedSpeed) {
-			console.log("Changed speed")
-			await tank.drive(movements[curMov], curSpeed);
-			changedSpeed = false;
-		}
+		await tank.drive(movements[curMov],curSpeed);
 	}
 
 	async function nextMove(){
@@ -136,47 +132,33 @@ async function main(tank) {
 		let posY = await tank.getY();
 		while (posX < limit[curMov][0] || posX > limit[curMov][1] || posY < limit[curMov][2] || posY > limit[curMov][3]){
 			curMov = (curMov +1)%maxMov;
-			changedSpeed = true;
 		}
 		if (posX < limitSpeed[curMov][0] || posX > limitSpeed[curMov][1] || posY < limitSpeed[curMov][2] || posY > limitSpeed[curMov][3]){
-			if (curSpeed !== 100) {
-				changedSpeed = true;
-				curSpeed = 100;
-			}
+			curSpeed = 100;
 		} else {
-			if (curSpeed !== 45) {
-				changedSpeed = true;
-				curSpeed = 45;
-			}
+			curSpeed = 45;
 		}
+		console.log("Moving to "+curMov+" with "+posX+" "+posY);
 	}
 
 	async function correctTrajectory(){
-		const x = await tank.getX();
-		const y = await tank.getY();
-		if ( x < 70 || x  > 1270 || y  < 70 || y  > 930){
-			changedSpeed = true;
+		let posX = await tank.getX();
+		let posY = await tank.getY();
+		while (await tank.getX() < 75){
 			await tank.drive(0,0);
+			await tank.drive(0,50);
 		}
-
-		if ( x < 70){
-			while(await tank.getX() < 70) {
-				await tank.drive(0, 50);
-			}
-		} else if ( x  > 1270){
-			while(await tank.getX() < 1270) {
-				await tank.drive(180, 50);
-			}
+		while (await tank.getX()  > 1250){
+			await tank.drive(0,0);
+			await tank.drive(180,50);
 		}
-
-		if ( y  < 70){
-			while(await tank.getY() < 70) {
-				await tank.drive(90, 50);
-			}
-		} else if ( y  > 930){
-			while(await tank.getY() < 930) {
-				await tank.drive(270,50);
-			}
+		while (await tank.getY()  < 75){
+			await tank.drive(0,0);
+			await tank.drive(90,50);
+		}
+		while (await tank.getY()  > 910){
+			await tank.drive(0,0);
+			await tank.drive(270,50);
 		}
 	}
 }
