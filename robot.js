@@ -100,6 +100,7 @@ async function main(tank) {
     await _init_strategy();
 	while (true) {
 
+		console.log("Dir=" + curMov + " Speed=" + curSpeed);
 		let enemyDistance = await _scan_strategy2();
 
 		// Hemos encontrado a alguien
@@ -119,17 +120,14 @@ async function main(tank) {
 
 		await nextMove();
 		await correctTrajectory();
-		await checkForEnemy();
 		await setMove();
-	}
-
-	async function checkForEnemy(){
-
 	}
 
 	async function setMove() {
 		if (changedSpeed) {
+			console.log("Changed speed")
 			await tank.drive(movements[curMov], curSpeed);
+			changedSpeed = false;
 		}
 	}
 
@@ -141,30 +139,44 @@ async function main(tank) {
 			changedSpeed = true;
 		}
 		if (posX < limitSpeed[curMov][0] || posX > limitSpeed[curMov][1] || posY < limitSpeed[curMov][2] || posY > limitSpeed[curMov][3]){
-			if (curSpeed != 100)changedSpeed =true;
-			curSpeed = 100;
+			if (curSpeed !== 100) {
+				changedSpeed = true;
+				curSpeed = 100;
+			}
 		} else {
-			if (curSpeed != 45) changedSpeed = true;
-			curSpeed = 45;
+			if (curSpeed !== 45) {
+				changedSpeed = true;
+				curSpeed = 45;
+			}
 		}
 	}
 
 	async function correctTrajectory(){
-		if (await tank.getX() < 70 || await tank.getX()  > 1270 || await tank.getY()  < 70 || await tank.getY()  > 930){
+		const x = await tank.getX();
+		const y = await tank.getY();
+		if ( x < 70 || x  > 1270 || y  < 70 || y  > 930){
 			changedSpeed = true;
 			await tank.drive(0,0);
 		}
-		while (await tank.getX() < 70){
-			await tank.drive(0,50);
+
+		if ( x < 70){
+			while(await tank.getX() < 70) {
+				await tank.drive(0, 50);
+			}
+		} else if ( x  > 1270){
+			while(await tank.getX() < 1270) {
+				await tank.drive(180, 50);
+			}
 		}
-		while (await tank.getX()  > 1270){
-			await tank.drive(180,50);
-		}
-		while (await tank.getY()  < 70){
-			await tank.drive(90,50);
-		}
-		while (await tank.getY()  > 930){
-			await tank.drive(270,50);
+
+		if ( y  < 70){
+			while(await tank.getY() < 70) {
+				await tank.drive(90, 50);
+			}
+		} else if ( y  > 930){
+			while(await tank.getY() < 930) {
+				await tank.drive(270,50);
+			}
 		}
 	}
 }
