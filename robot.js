@@ -118,7 +118,6 @@ async function main(tank) {
 		await correctTrajectory();
 		await checkForEnemy();
 		await setMove();
-		console.log(curSpeed);
 	}
 
 	async function checkForEnemy(){
@@ -126,7 +125,9 @@ async function main(tank) {
 	}
 
 	async function setMove() {
-		await tank.drive(movements[curMov],curSpeed);
+		if (changedSpeed) {
+			await tank.drive(movements[curMov], curSpeed);
+		}
 	}
 
 	async function nextMove(){
@@ -134,13 +135,15 @@ async function main(tank) {
 		let posY = await tank.getY();
 		while (posX < limit[curMov][0] || posX > limit[curMov][1] || posY < limit[curMov][2] || posY > limit[curMov][3]){
 			curMov = (curMov +1)%maxMov;
+			changedSpeed = true;
 		}
 		if (posX < limitSpeed[curMov][0] || posX > limitSpeed[curMov][1] || posY < limitSpeed[curMov][2] || posY > limitSpeed[curMov][3]){
+			if (curSpeed != 100)changedSpeed =true;
 			curSpeed = 100;
 		} else {
+			if (curSpeed != 45) changedSpeed = true;
 			curSpeed = 45;
 		}
-		console.log("Moving to "+curMov+" with "+posX+" "+posY);
 	}
 
 	async function correctTrajectory(){
