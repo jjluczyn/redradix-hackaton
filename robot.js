@@ -15,10 +15,10 @@ async function main(tank) {
 	const movements = [0,90,180,270];
 	// x < , x > , y < , y > nextCondition
 	const limit = [
-		[0,1140,0,2000],
-		[0,2000,0,820],
-		[190,2000,0,2000],
-		[0,2000,190,2000]
+		[0,1190,0,2000],
+		[0,2000,0,850],
+		[150,2000,0,2000],
+		[0,2000,150,2000]
 	];
 	const limitSpeed = [
 		[1000,2000,0,2000],
@@ -31,7 +31,7 @@ async function main(tank) {
 	let curMov = 0;
 	let curSpeed = 100;
 	let currentAngle = 0;
-
+	let changedSpeed = true;
 	// Initial random scan margin
     let aperture = 2;
     let iterWithoutFind = 0;
@@ -118,6 +118,7 @@ async function main(tank) {
 		await correctTrajectory();
 		await checkForEnemy();
 		await setMove();
+		console.log(curSpeed);
 	}
 
 	async function checkForEnemy(){
@@ -143,22 +144,20 @@ async function main(tank) {
 	}
 
 	async function correctTrajectory(){
-		let posX = await tank.getX();
-		let posY = await tank.getY();
-		while (await tank.getX() < 75){
+		if (await tank.getX() < 70 || await tank.getX()  > 1270 || await tank.getY()  < 70 || await tank.getY()  > 930){
+			changedSpeed = true;
 			await tank.drive(0,0);
+		}
+		while (await tank.getX() < 70){
 			await tank.drive(0,50);
 		}
-		if (await tank.getX()  > 1250){
-			await tank.drive(0,0);
+		while (await tank.getX()  > 1270){
 			await tank.drive(180,50);
 		}
-		if (await tank.getY()  < 75){
-			await tank.drive(0,0);
+		while (await tank.getY()  < 70){
 			await tank.drive(90,50);
 		}
-		if (await tank.getY()  > 910){
-			await tank.drive(0,0);
+		while (await tank.getY()  > 930){
 			await tank.drive(270,50);
 		}
 	}
