@@ -91,7 +91,20 @@ async function main(tank) {
 
 	async function _init_strategy(){
         let x = await tank.getX();
-        curMov = x < 700 ? 2 : 0;
+        let y = await tank.getY();
+
+        let izq = x < max_width / 2;
+        let arriba = y > max_height / 2;
+
+        if(izq && arriba){
+            curMov = 2;
+        } else if (izq && !arriba) {
+            curMov = 3;
+        } else if (!izq && !arriba) {
+            curMov = 0;
+        } else if (!izq && arriba) {
+            curMov = 1;
+        }
     }
 
     // *********************
